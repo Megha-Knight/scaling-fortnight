@@ -16,3 +16,28 @@ db.sqlite3
 # Ignore compiled files
 *.pyc
 *.pyo
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore compiled Python files
+__pycache__/
+*.py[cod]
+
+# Ignore database files
+*.sqlite3
+db.sqlite3
+
+# Ignore static and media files
+/static/
+media/
+
+# Ignore virtual environment
+venv/
+.env/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
