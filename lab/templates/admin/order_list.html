@@ -1,0 +1,462 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <div class="flex items-center justify-center h-16 border-b">
+                <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
+            </div>
+            <nav class="mt-6 px-4 space-y-3">
+                <a href="{% url 'lab:admin_dashboard' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-home w-5"></i>
+                    <span class="mx-4">Dashboard</span>
+                </a>
+                <a href="{% url 'lab:user_list' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-users w-5"></i>
+                    <span class="mx-4">Users</span>
+                </a>
+                <a href="{% url 'lab:admin_product_list' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-box w-5"></i>
+                    <span class="mx-4">Products</span>
+                </a>
+                <a href="{% url 'lab:admin_orders' %}" class="flex items-center px-4 py-3 bg-blue-50 text-blue-600 rounded-lg">
+                    <i class="fas fa-shopping-cart w-5"></i>
+                    <span class="mx-4">Orders</span>
+                </a>
+                <a href="{% url 'lab:admin_lab_bookings' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-calendar w-5"></i>
+                    <span class="mx-4">Lab Bookings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <!-- Header -->
+            <header class="bg-white shadow-sm">
+                <div class="flex justify-between items-center px-6 h-16">
+                    <h2 class="text-xl font-semibold text-gray-800">Order Management</h2>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-600">Welcome, {{ request.user.username }}</span>
+                        
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="p-6">
+                {% csrf_token %}
+                <!-- Filters -->
+                <div class="mb-6 bg-white rounded-lg shadow p-4">
+                    <form method="GET" class="flex flex-wrap items-center gap-4">
+                        <div class="relative">
+                            <select name="status" class="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 rounded-md">
+                                <option value="">All Status</option>
+                                <option value="processing" {% if order.order_status == "processing" %}selected{% endif %}>Processing</option>
+                                <option value="completed" {% if order.order_status == "completed" %}selected{% endif %}>Completed</option>
+                                <option value="delivered" {% if order.order_status == "delivered" %}selected{% endif %}>Delivered</option>
+                            </select>
+                        </div>
+                        
+                        <div class="relative">
+                            <select name="product" class="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 rounded-md">
+                                <option value="">All Products</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" {% if product.id|stringformat:"s" == current_product %}selected{% endif %}>
+                                    {{ product.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="relative">
+                            <select name="user" class="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 rounded-md">
+                                <option value="">All Users</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}" {% if user.id|stringformat:"s" == current_user %}selected{% endif %}>
+                                    {{ user.username }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ search_query }}" 
+                                   placeholder="Search orders..." 
+                                   class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-md">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Apply Filters
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="bg-white rounded-lg shadow overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for order in orders %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="text-sm font-medium text-gray-900">#{{ order.id }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ order.user.username }}</div>
+                                    <div class="text-sm text-gray-500">{{ order.user.email }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ order.product.name }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ order.quantity }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">₹{{ order.product.discounted_price }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">₹{{ order.total_amount }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                        {% if order.order_status == 'COMPLETED' %}bg-green-100 text-green-800
+                                        {% elif order.order_status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                                        {% elif order.order_status == 'PROCESSING' %}bg-blue-100 text-blue-800
+                                        {% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ order.get_order_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ order.created_at|date:"M d, Y" }}</div>
+                                    <div class="text-sm text-gray-500">{{ order.created_at|time:"H:i" }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap flex gap-2 items-center">
+                                    <select id="order-status-{{ order.id }}" class="w-32 p-2 text-sm border border-gray-300 rounded-md bg-white text-gray-700">
+                                        <option value="processing" {% if order.order_status == "processing" %}selected{% endif %}>Processing</option>
+                                        <option value="completed" {% if order.order_status == "completed" %}selected{% endif %}>Completed</option>
+                                        <option value="delivered" {% if order.order_status == "delivered" %}selected{% endif %}>Delivered</option>
+                                    </select>
+                                    <button onclick="updateOrderStatus({{ order.id }})"
+                                            class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                                        Update
+                                    </button>
+                                    <span id="status-indicator-{{ order.id }}" class="ml-2 opacity-0 transition-opacity duration-300"></span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="px-6 py-4 text-center text-gray-500">
+                                    No orders found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if orders.has_other_pages %}
+                <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4 rounded-lg shadow">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        {% if orders.has_previous %}
+                        <a href="?page={{ orders.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</a>
+                        {% endif %}
+                        {% if orders.has_next %}
+                        <a href="?page={{ orders.next_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</a>
+                        {% endif %}
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing <span class="font-medium">{{ orders.start_index }}</span> to 
+                                <span class="font-medium">{{ orders.end_index }}</span> of 
+                                <span class="font-medium">{{ orders.paginator.count }}</span> results
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                {% if orders.has_previous %}
+                                <a href="?page={{ orders.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                                {% endif %}
+                                
+                                {% for i in orders.paginator.page_range %}
+                                <a href="?page={{ i }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium {% if orders.number == i %}text-blue-600{% else %}text-gray-700{% endif %} hover:bg-gray-50">
+                                    {{ i }}
+                                </a>
+                                {% endfor %}
+                                
+                                {% if orders.has_next %}
+                                <a href="?page={{ orders.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+    function updateOrderStatus(orderId) {
+        const button = event.target;
+        const originalText = button.innerText;
+        const indicator = document.getElementById(`status-indicator-${orderId}`);
+        const newStatus = document.getElementById(`order-status-${orderId}`).value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Disable button and show loading state
+        button.disabled = true;
+        button.innerText = 'Updating...';
+
+        fetch("update_order_status/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                order_id: orderId,
+                status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success indicator
+                indicator.textContent = '✓';
+                indicator.className = 'ml-2 text-green-500 opacity-100';
+                
+                // Optional: Update any other elements on the page that show the order status
+                const statusElements = document.querySelectorAll(`.order-${orderId}-status`);
+                statusElements.forEach(el => el.textContent = newStatus);
+            } else {
+                // Show error indicator
+                indicator.textContent = '⚠️';
+                indicator.className = 'ml-2 text-red-500 opacity-100';
+                console.error('Update failed:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            indicator.textContent = '⚠️';
+            indicator.className = 'ml-2 text-red-500 opacity-100';
+        })
+        .finally(() => {
+            // Reset button state
+            button.disabled = false;
+            button.innerText = originalText;
+
+            // Hide indicator after 2 seconds
+            setTimeout(() => {
+                indicator.className = 'ml-2 opacity-0 transition-opacity duration-300';
+            }, 2000);
+        });
+}
+
+    // Preserve filter parameters in pagination links
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paginationLinks = document.querySelectorAll('nav a');
+        
+        paginationLinks.forEach(link => {
+            const href = new URL(link.href);
+            const page = href.searchParams.get('page');
+            
+            urlParams.forEach((value, key) => {
+                if (key !== 'page') {
+                    href.searchParams.set(key, value);
+                }
+            });
+            
+            if (page) {
+                href.searchParams.set('page', page);
+            }
+            
+            link.href = href.toString();
+        });
+    });
+
+    // Display flash messages
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Handle filter form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const filterInputs = this.querySelectorAll('select, input[type="text"]');
+        let hasValue = false;
+        
+        filterInputs.forEach(input => {
+            if (input.value) {
+                hasValue = true;
+            }
+        });
+        
+        if (!hasValue) {
+            e.preventDefault();
+            alert('Please select at least one filter option');
+        }
+    });
+
+    // Format currency
+    document.querySelectorAll('.currency').forEach(element => {
+        const amount = parseFloat(element.textContent);
+        element.textContent = new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR'
+        }).format(amount);
+    });
+
+    // Add confirmation for status changes
+    const statusSelects = document.querySelectorAll('select[onchange*="updateOrderStatus"]');
+    statusSelects.forEach(select => {
+        const originalOnchange = select.getAttribute('onchange');
+        select.setAttribute('onchange', '');
+        
+        select.addEventListener('change', function() {
+            const newStatus = this.value;
+            const orderId = originalOnchange.match(/\d+/)[0];
+            
+            if (confirm(`Are you sure you want to update this order's status to ${newStatus}?`)) {
+                updateOrderStatus(orderId, newStatus);
+            } else {
+                // Reset to previous value
+                this.value = this.getAttribute('data-previous-value');
+            }
+        });
+        
+        // Store the initial value
+        select.setAttribute('data-previous-value', select.value);
+    });
+
+    // Handle table row hover effects
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.classList.add('bg-gray-50');
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.classList.remove('bg-gray-50');
+        });
+    });
+
+    // Add keyboard navigation for pagination
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            const prevLink = document.querySelector('a[rel="prev"]');
+            if (prevLink) prevLink.click();
+        } else if (e.key === 'ArrowRight') {
+            const nextLink = document.querySelector('a[rel="next"]');
+            if (nextLink) nextLink.click();
+        }
+    });
+    </script>
+
+    <!-- Add responsive meta tag and additional styles -->
+    <style>
+        @media (max-width: 640px) {
+            .w-64 {
+                width: 100%;
+            }
+            
+            .flex {
+                flex-direction: column;
+            }
+            
+            .overflow-x-auto {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Custom scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Loading indicator styles */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{% extends 'lab/base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <div class="text-center">
+            <svg class="h-16 w-16 text-red-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <h2 class="mt-4 text-2xl font-bold text-gray-900">Payment Failed</h2>
+            <p class="mt-2 text-gray-600">We couldn't process your payment. Please try again.</p>
+        </div>
+        
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold">Order Details</h3>
+            <dl class="mt-4 space-y-3">
+                <div class="flex justify-between">
+                    <dt class="text-gray-600">Order ID:</dt>
+                    <dd class="font-medium">{{ order.id }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-gray-600">Amount:</dt>
+                    <dd class="font-medium">₹{{ payment.amount }}</dd>
+                </div>
+            </dl>
+        </div>
+        
+        <div class="mt-8 space-y-4">
+            <a href="{% url 'lab:create_order' order.product.id %}" class="block w-full text-center bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                Try Again
+            </a>
+            <a href="{% url 'lab:product_list' %}" class="block w-full text-center border border-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-50">
+                Return to Products
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

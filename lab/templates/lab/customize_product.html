@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize {{ product.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-green-600 text-white p-4">
+        <div class="container mx-auto flex justify-between">
+            <a href="/" class="text-xl font-bold">KIOT Idea Lab</a>
+            <div class="space-x-4">
+                <a href="/dashboard" class="hover:text-gray-200">Dashboard</a>
+                <a href="/products" class="hover:text-gray-200">Products</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto py-10 px-4">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-2xl font-bold mb-6">Customize Your {{ product.name }}</h2>
+            
+            <form method="POST" action="{% url 'lab:create_order' product_id=product.id %}" enctype="multipart/form-data" class="space-y-6" id="customizationForm">
+                {% csrf_token %}
+                
+                {% if product.category in 'TSHIRT,CUP' %}
+                    <div class="space-y-4">
+                        <div>
+                            <label for="id_quantity" class="block text-sm font-medium text-gray-700">Quantity:</label>
+                            <input type="number" name="quantity" id="id_quantity" min="1" required 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Upload Design</label>
+                            <input type="file" name="user_image" id="user_image" accept="image/*" required
+                                   class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                            <div id="imagePreview" class="mt-4 hidden">
+                                <h3 class="font-medium mb-2">Preview:</h3>
+                                <img id="previewImage" class="max-w-full h-auto rounded-md">
+                            </div>
+                        </div>
+                        
+                        <!-- <div>
+                            <label for="id_custom_text" class="block text-sm font-medium text-gray-700">Custom Text:</label>
+                            <input type="text" name="custom_text" id="id_custom_text" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        </div>
+                        
+                        <div>
+                            <label for="id_font_style" class="block text-sm font-medium text-gray-700">Font Style:</label>
+                            <select name="font_style" id="id_font_style" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Helvetica">Helvetica</option>
+                                <option value="Verdana">Verdana</option>
+                            </select>
+                        </div>
+                        
+                        <div id="textPreview" class="mt-4 p-4 border rounded-md hidden">
+                            <h3 class="font-medium mb-2">Text Preview:</h3>
+                            <p id="previewText"></p>
+                        </div>
+                    </div> -->
+                {% else %}
+                    <div>
+                        <label for="id_quantity" class="block text-sm font-medium text-gray-700">Quantity:</label>
+                        <input type="number" name="quantity" id="id_quantity" min="1" required 
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Upload Design</label>
+                        <input type="file" name="user_image" id="user_image" accept="image/*" required
+                               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                        <div id="imagePreview" class="mt-4 hidden">
+                            <h3 class="font-medium mb-2">Preview:</h3>
+                            <img id="previewImage" class="max-w-full h-auto rounded-md">
+                        </div>
+                    </div>
+                {% endif %}
+            
+                <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors">
+                    Proceed to Payment
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Preview functionality
+        {% if product.category in 'tshirt,cup' %}
+            const textInput = document.getElementById('name_text');
+            //const fontInput = document.getElementById('font_style');
+            //const textPreview = document.getElementById('textPreview');
+            const previewText = document.getElementById('previewText');
+
+            function updateTextPreview() {
+                const text = textInput.value;
+                const font = fontInput.value;
+                if (text) {
+                    textPreview.classList.remove('hidden');
+                    previewText.textContent = text;
+                    previewText.style.fontFamily = font;
+                } else {
+                    textPreview.classList.add('hidden');
+                }
+            }
+
+            textInput.addEventListener('input', updateTextPreview);
+            fontInput.addEventListener('input', updateTextPreview);
+        {% else %}
+            const imageInput = document.getElementById('user_image');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        imagePreview.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        {% endif %}
+    </script>
+</body>
+</html>

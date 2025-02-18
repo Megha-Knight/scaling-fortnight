@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-64 bg-white shadow-lg transition-all duration-300">
+            <div class="p-4 flex justify-between items-center border-b">
+                <h2 class="font-bold">Admin Panel</h2>
+                <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+            
+            <nav class="p-4">
+                <a href="#" class="flex items-center gap-4 p-2 hover:bg-gray-100 rounded-lg cursor-pointer mb-2">
+                    <i data-lucide="users"></i>
+                    <span>Users</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-2 hover:bg-gray-100 rounded-lg cursor-pointer mb-2">
+                    <i data-lucide="package"></i>
+                    <span>Products</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-2 hover:bg-gray-100 rounded-lg cursor-pointer mb-2">
+                    <i data-lucide="calendar"></i>
+                    <span>Lab Bookings</span>
+                </a>
+                <a href="#" class="flex items-center gap-4 p-2 hover:bg-gray-100 rounded-lg cursor-pointer mb-2">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Sales</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <header class="bg-white shadow-sm p-4">
+                <h1 class="text-2xl font-bold">Dashboard Overview</h1>
+            </header>
+
+            <main class="p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <!-- Total Sales Card -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex flex-row items-center justify-between pb-2">
+                            <h3 class="text-sm font-medium">Total Sales</h3>
+                        </div>
+                        <div class="text-2xl font-bold">₹45,231</div>
+                        <p class="text-xs text-green-600">+12.5% from last month</p>
+                    </div>
+
+                    <!-- Orders Card -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex flex-row items-center justify-between pb-2">
+                            <h3 class="text-sm font-medium">Orders in Process</h3>
+                        </div>
+                        <div class="text-2xl font-bold">23</div>
+                        <p class="text-xs text-green-600">+5% from last month</p>
+                    </div>
+
+                    <!-- Approvals Card -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex flex-row items-center justify-between pb-2">
+                            <h3 class="text-sm font-medium">Pending Approvals</h3>
+                        </div>
+                        <div class="text-2xl font-bold">7</div>
+                        <p class="text-xs text-red-600">-2% from last month</p>
+                    </div>
+                </div>
+
+                <!-- Charts and Booking Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Sales Chart -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-medium mb-4">Sales Overview</h3>
+                        <div class="h-80">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Lab Bookings -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium">Pending Lab Bookings</h3>
+                            <button class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                                View All
+                            </button>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- Booking Item 1 -->
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <h3 class="font-medium">Workshop</h3>
+                                    <p class="text-sm text-gray-500">Dr. Smith - 2025-02-10</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700">
+                                        Accept
+                                    </button>
+                                    <button class="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700">
+                                        Decline
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Booking Item 2 -->
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <h3 class="font-medium">Seminar</h3>
+                                    <p class="text-sm text-gray-500">Dr. Johnson - 2025-02-15</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700">
+                                        Accept
+                                    </button>
+                                    <button class="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700">
+                                        Decline
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4">
+                    <button class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Add New User
+                    </button>
+                    <button class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Add New Product
+                    </button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Sidebar Toggle Function
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('w-64');
+            sidebar.classList.toggle('w-20');
+            
+            // Toggle visibility of text in sidebar items
+            const sidebarTexts = document.querySelectorAll('#sidebar nav span');
+            sidebarTexts.forEach(text => text.classList.toggle('hidden'));
+        }
+
+        // Initialize Sales Chart
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                datasets: [{
+                    label: 'Sales',
+                    data: [4000, 3000, 5000, 4500, 6000],
+                    backgroundColor: '#4f46e5',
+                    borderColor: '#4f46e5',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - KIOT Idea Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body class="bg-gray-50">
+    <div class="container mx-auto py-10 px-4">
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold mb-6">Order Summary</h2>
+            <div class="space-y-4 mb-6">
+                <p><span class="font-medium">Product:</span> {{ order.product.name }}</p>
+                <p><span class="font-medium">Total Amount:</span> Rs. {{ order.total_amount }}</p>
+            </div>
+            <button id="payButton" class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700">
+                Pay Now
+            </button>
+        </div>
+    </div>
+
+    <script>
+        var orderId = "{{ order.id }}";
+        
+
+        document.getElementById('payButton').addEventListener('click', function () {
+            fetch(`/api/payment/initiate/${orderId}/`, {
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Important: CSRF token
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Payment initiation response:', data);
+                    if (data.error) {
+                        alert('Error initiating payment: ' + data.error);
+                        return;
+                    }
+                    
+                    const options = {
+                        key: data.razorpay_key,
+                        amount: data.razorpay_amount,
+                        currency: "INR",
+                        name: "KIOT Idea Lab",
+                        description: `Order #${orderId}`,
+                        image: "/static/logo.png", // Make sure this path is correct
+                        order_id: data.razorpay_order_id,
+                        
+                        handler: function (response) {
+                            handlePaymentSuccess(response);
+                        },
+                        prefill: {  // Add prefill information
+                            name: "{{ order.user.first_name }} {{ order.user.last_name }}",
+                            email: "{{ order.user.email }}",
+                            contact: "{{ order.user.mobile_number }}"
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                console.log('Payment modal closed');
+                            }
+                        }
+                    };
+                    console.log(options);
+
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                })
+                .catch(error => {
+                    console.error('Error initiating payment:', error);
+                    alert('Failed to initiate payment');
+                });
+        });
+
+        function handlePaymentSuccess(response) {
+            fetch('/api/payment/callback/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // CSRF token here as well
+                },
+                body: JSON.stringify(response) // Send the entire response
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = `/payment/success/${data.order_id}/`; // Correct URL
+                    } else {
+                        alert('Payment verification failed: ' + data.error); // Display error
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during payment verification:', error);
+                    alert('Payment verification failed.');
+                });
+        }
+    </script>
+
+</body>
+
+</html>

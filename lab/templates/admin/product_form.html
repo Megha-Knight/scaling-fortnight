@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if form.instance.pk %}Edit Product{% else %}Add Product{% endif %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <div class="flex items-center justify-center h-16 border-b">
+                <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
+            </div>
+            <nav class="mt-6 px-4 space-y-3">
+              <a href="{% url 'lab:admin_dashboard' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                <i class="fas fa-home w-5"></i>
+                <span class="mx-4">Dashboard</span>
+              </a>
+              <a href="{% url 'lab:user_list' %}" class="flex items-center px-4 py-3  hover:bg-gray-100 rounded-lg">
+                  <i class="fas fa-users w-5"></i>
+                  <span class="mx-4">Users</span>
+              </a>
+              <a href="{% url 'lab:admin_product_list' %}" class="flex items-center px-4 py-3 bg-gray-50 text-blue-600 rounded-lg">
+                <i class="fas fa-box w-5"></i>
+                <span class="mx-4">Products</span>
+              </a>
+              <a href="{% url 'lab:admin_orders' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                  <i class="fas fa-shopping-cart w-5"></i>
+                  <span class="mx-4">Orders</span>
+              </a>
+              <a href="{% url 'lab:lab_booking_list' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                  <i class="fas fa-calendar w-5"></i>
+                  <span class="mx-4">Lab Bookings</span>
+              </a>
+                
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <header class="bg-white shadow-sm">
+                <div class="flex justify-between items-center px-6 h-16">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        {% if form.instance.pk %}Edit Product{% else %}Add Product{% endif %}
+                    </h2>
+                </div>
+            </header>
+
+            <main class="p-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <form method="post" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                            <div class="mt-1">
+                                {{ field }}
+                            </div>
+                            {% if field.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ field.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="flex space-x-4">
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-save mr-2"></i>Save Product
+                            </button>
+                            <a href="{% url 'lab:admin_product_list' %}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                                <i class="fas fa-arrow-left mr-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

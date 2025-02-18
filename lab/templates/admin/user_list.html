@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <div class="flex items-center justify-center h-16 border-b">
+                <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>
+            </div>
+            <nav class="mt-6 px-4 space-y-3">
+                <a href="{% url 'lab:admin_dashboard' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-home w-5"></i>
+                    <span class="mx-4">Dashboard</span>
+                </a>
+                <a href="{% url 'lab:user_list' %}" class="flex items-center px-4 py-3 bg-blue-50 text-blue-600 rounded-lg">
+                    <i class="fas fa-users w-5"></i>
+                    <span class="mx-4">Users</span>
+                </a>
+                <a href="{% url 'lab:admin_product_list' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-box w-5"></i>
+                    <span class="mx-4">Products</span>
+                </a>
+                <a href="{% url 'lab:admin_orders' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-shopping-cart w-5"></i>
+                    <span class="mx-4">Orders</span>
+                </a>
+                <a href="{% url 'lab:admin_lab_bookings' %}" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-lg">
+                    <i class="fas fa-calendar w-5"></i>
+                    <span class="mx-4">Lab Bookings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+            <header class="bg-white shadow-sm">
+                <div class="flex justify-between items-center px-6 h-16">
+                    <h2 class="text-xl font-semibold text-gray-800">User Management</h2>
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'lab:add_user' %}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <i class="fas fa-user-plus"></i> Add User
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <main class="p-6">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                {% for user in users %}
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ user.username }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ user.email }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ user.date_joined }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap space-x-3">
+                                        <a href="{% url 'lab:update_user' user.id %}" class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{% url 'lab:delete_user' user.id %}" method="POST" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to delete this product?');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

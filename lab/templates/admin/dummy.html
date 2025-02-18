@@ -1,0 +1,110 @@
+{% extends 'admin/layout.html' %}
+{% block title %}Lab Bookings{% endblock %}
+{% block header %}Lab Bookings Management{% endblock %}
+{% block content %}
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-800">Lab Bookings</h3>
+        </div>
+        <div class="p-6">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for booking in bookings %}
+                    <tr>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ booking.event_name }}</div>
+                            <div class="text-sm text-gray-500">Coordinator: {{ booking.event_coordinator }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ booking.faculty.get_full_name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ booking.department }}</td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">{{ booking.start_date|date:"M d, Y" }}</div>
+                            <div class="text-sm text-gray-500">
+                                {{ booking.start_date|time:"H:i" }} - {{ booking.end_date|time:"H:i" }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if booking.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                                {% elif booking.status == 'APPROVED' %}bg-green-100 text-green-800
+                                {% elif booking.status == 'REJECTED' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ booking.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm space-x-2">
+                            <!-- View Details Button -->
+                            <button onclick="showDetails('{{ booking.id }}')" 
+                                    class="text-blue-600 hover:text-blue-900">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            
+                            {% if booking.status == 'PENDING' %}
+                            <!-- Approve Button -->
+                            <form method="post" action="{% url 'update_booking_status' booking.id %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="APPROVED">
+                                <button type="submit" class="text-green-600 hover:text-green-900">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
+                            
+                            <!-- Decline Button -->
+                            <form method="post" action="{% url 'update_booking_status' booking.id %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="REJECTED">
+                                <button type="submit" class="text-red-600 hover:text-red-900">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- Details Modal -->
+                    <div id="details-modal-{{ booking.id }}" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+                        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                            <div class="flex justify-between items-center pb-3">
+                                <h3 class="text-lg font-medium">Booking Details</h3>
+                                <button onclick="closeDetails('{{ booking.id }}')" class="text-gray-400 hover:text-gray-500">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="space-y-3">
+                                <p><strong>Event:</strong> {{ booking.event_name }}</p>
+                                <p><strong>Coordinator:</strong> {{ booking.event_coordinator }}</p>
+                                <p><strong>Chief Guest:</strong> {{ booking.chief_guest }}</p>
+                                <p><strong>Department:</strong> {{ booking.department }}</p>
+                                <p><strong>Start:</strong> {{ booking.start_date|date:"M d, Y H:i" }}</p>
+                                <p><strong>End:</strong> {{ booking.end_date|date:"M d, Y H:i" }}</p>
+                                <p><strong>Status:</strong> {{ booking.status }}</p>
+                                <p><strong>Created:</strong> {{ booking.created_at|date:"M d, Y H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function showDetails(bookingId) {
+            document.getElementById(`details-modal-${bookingId}`).classList.remove('hidden');
+        }
+
+        function closeDetails(bookingId) {
+            document.getElementById(`details-modal-${bookingId}`).classList.add('hidden');
+        }
+    </script>
+{% endblock %}
